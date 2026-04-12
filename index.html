@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>Pilates Manager - Dr. Giovana</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="icon" type="image/png" href="favicon.png">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar no-print">
+            <div class="brand"><i class="fa-solid fa-spa"></i>
+                <h2>Pilates Manager</h2>
+            </div>
+            <nav class="menu">
+                <button class="menu-item active" data-tab="tab-alunos"><i class="fa-solid fa-users"></i> Gestão de
+                    Alunos</button>
+                <button class="menu-item" data-tab="tab-prontuario"><i class="fa-solid fa-chart-line"></i>
+                    Evolução</button>
+                <button class="menu-item" data-tab="tab-financeiro"><i class="fa-solid fa-dollar-sign"></i>
+                    Financeiro</button>
+                <button class="menu-item" data-tab="tab-calendario"><i class="fa-solid fa-calendar-week"></i>
+                    Calendário Geral</button>
+                <button class="menu-item" data-tab="tab-painel"><i class="fa-solid fa-clock"></i>
+                    Painel Ao Vivo</button>
+                <button class="menu-item" data-tab="tab-agenda"><i class="fa-solid fa-list-check"></i>
+                    Configurar Turmas</button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <section id="tab-alunos" class="tab-pane active no-print">
+                <div class="header-actions">
+                    <h2>Alunos Matriculados</h2>
+                    <div class="btn-group">
+                        <button id="btn-backup-menu" class="btn btn-outline"><i
+                                class="fa-solid fa-cloud-arrow-down"></i> Backup</button>
+                        <button id="btn-novo-aluno" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Novo
+                            Aluno</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Plano (Frequência)</th>
+                                <th>Mensalidade</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-alunos"></tbody>
+                    </table>
+                </div>
+                <input type="file" id="input-import-json" accept=".json" style="display: none;">
+            </section>
+
+            <section id="tab-prontuario" class="tab-pane">
+                <div class="header-actions no-print">
+                    <h2>Evolução Diária</h2>
+                    <button id="btn-trigger-pdf-modal" class="btn btn-outline" style="display: none;"><i
+                            class="fa-solid fa-file-pdf"></i> PDF Mensal</button>
+                </div>
+
+                <div class="card no-print" style="position: relative; z-index: 50;">
+                    <select id="select-aluno-prontuario" class="choices-custom">
+                        <option value="">Selecione o aluno...</option>
+                    </select>
+                </div>
+
+                <div id="area-prontuario-detalhe" style="display: none;">
+                    <div class="print-header only-print">
+                        <h1 style="color: #008080;">Relatório de Evolução - Pilates</h1>
+                        <p id="print-aluno-info"></p>
+                        <hr>
+                    </div>
+
+                    <div class="card mt-2 no-print">
+                        <h3>Nova Evolução</h3>
+                        <form id="form-evolucao">
+                            <input type="hidden" id="evo-id">
+                            <input type="text" id="evo-data" class="input-field mb-1" placeholder="Selecione a data..."
+                                required>
+                            <textarea id="evo-desc" class="input-field mb-1" rows="4"
+                                placeholder="Descreva o atendimento..." required></textarea>
+                            <button type="submit" class="btn btn-primary">Salvar Evolução</button>
+                        </form>
+                    </div>
+
+                    <div class="card mt-2 no-border-print">
+                        <h3 class="no-print">Histórico</h3>
+                        <div id="timeline-evolucoes" class="timeline"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-financeiro" class="tab-pane">
+                <div class="print-header only-print">
+                    <h1 style="color: #008080;">Relatório Financeiro - Pilates</h1>
+                    <p id="print-fin-info"></p>
+                    <hr>
+                </div>
+
+                <h2 class="no-print">Controle Financeiro</h2>
+                <div class="card header-actions no-print"
+                    style="margin-bottom: 20px; flex-direction: row; flex-wrap: wrap;">
+                    <input type="text" id="mes-financeiro" class="input-field" placeholder="Mês"
+                        style="flex: 1; min-width: 150px; margin-right: 10px;">
+                    <button id="btn-export-pdf-fin" class="btn btn-outline" style="min-width: 140px;"><i
+                            class="fa-solid fa-file-pdf"></i> Gerar PDF</button>
+                </div>
+                <div class="card no-border-print">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Aluno</th>
+                                <th>Freq.</th>
+                                <th>Valor</th>
+                                <th>Status Mensal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-financeiro"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-calendario" class="tab-pane no-print">
+                <div class="header-actions">
+                    <h2>Visão Geral da Semana</h2>
+                </div>
+                <div class="week-grid" id="grid-calendario"></div>
+            </section>
+
+            <section id="tab-painel" class="tab-pane no-print">
+                <div class="header-actions" style="border-bottom: 2px solid var(--border); padding-bottom: 15px;">
+                    <h2>Painel Hoje</h2>
+                    <div style="text-align: right;">
+                        <span id="data-agora"
+                            style="display: block; font-size: 0.9rem; color: var(--text-light);"></span>
+                        <span id="relogio-agora"
+                            style="font-size: 1.8rem; font-weight: bold; color: var(--primary-dark);">--:--</span>
+                    </div>
+                </div>
+
+                <div class="form-row" style="align-items: start;">
+                    <div class="card" style="flex: 1; border-top: 4px solid var(--success);">
+                        <h3 style="color: var(--success);"><i class="fa-solid fa-play"></i> Aula em Andamento</h3>
+                        <div id="painel-em-andamento" class="mt-2"></div>
+                    </div>
+                    <div class="card" style="flex: 1; border-top: 4px solid var(--warning);">
+                        <h3 style="color: var(--warning);"><i class="fa-solid fa-forward-step"></i> Próxima Aula</h3>
+                        <div id="painel-proxima" class="mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="card mt-2">
+                    <div class="flex-between" style="flex-wrap: wrap; gap: 10px;">
+                        <h3>Gestão de Faltas e Reposições</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Aluno</th>
+                                    <th>Faltou em</th>
+                                    <th>Status</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-faltas"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-agenda" class="tab-pane no-print">
+                <div class="header-actions">
+                    <h2>Configuração da Grade</h2>
+                    <button id="btn-config-precos" class="btn btn-outline"><i class="fa-solid fa-tags"></i> Tabela de
+                        Preços</button>
+                </div>
+
+                <div class="sub-tabs-container">
+                    <button class="sub-tab-btn active-subtab" id="btn-view-criar"><i class="fa-solid fa-plus"></i> Criar
+                        Turmas</button>
+                    <button class="sub-tab-btn" id="btn-view-gerenciar"><i class="fa-solid fa-user-plus"></i> Matricular
+                        (Fixo)</button>
+                </div>
+
+                <div id="view-criar-aula">
+                    <div class="card">
+                        <h3>Criar Nova Turma</h3>
+                        <form id="form-aula" class="mt-2">
+                            <select id="aula-dia" class="input-field mb-1" required>
+                                <option value="" disabled selected>Selecione o Dia da Semana</option>
+                                <option value="Segunda-feira">Segunda-feira</option>
+                                <option value="Terça-feira">Terça-feira</option>
+                                <option value="Quarta-feira">Quarta-feira</option>
+                                <option value="Quinta-feira">Quinta-feira</option>
+                                <option value="Sexta-feira">Sexta-feira</option>
+                                <option value="Sábado">Sábado</option>
+                            </select>
+                            <input type="text" id="aula-nome" class="input-field mb-1" placeholder="Ex: Pilates Manhã"
+                                required>
+                            <div class="form-row">
+                                <input type="text" id="aula-inicio" class="input-field" placeholder="Início" required>
+                                <input type="text" id="aula-fim" class="input-field" placeholder="Fim" required>
+                            </div>
+                            <input type="number" id="aula-limite" class="input-field mt-1 mb-1"
+                                placeholder="Máx. Alunos" min="1" required>
+                            <button type="submit" class="btn btn-primary btn-full">Criar Turma Fixa</button>
+                        </form>
+                        <div class="mt-2" id="lista-aulas"></div>
+                    </div>
+                </div>
+
+                <div id="view-gerenciar-agenda" style="display: none;">
+                    <div class="card mt-2">
+                        <h3>Matrículas Fixas Semanais</h3>
+
+                        <div style="margin-top: 15px; margin-bottom: 10px; position: relative; z-index: 51;">
+                            <select id="filtro-dia-agenda" class="choices-custom">
+                                <option value="">Filtrar turmas por dia...</option>
+                                <option value="Segunda-feira">Segunda-feira</option>
+                                <option value="Terça-feira">Terça-feira</option>
+                                <option value="Quarta-feira">Quarta-feira</option>
+                                <option value="Quinta-feira">Quinta-feira</option>
+                                <option value="Sexta-feira">Sexta-feira</option>
+                                <option value="Sábado">Sábado</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 10px; position: relative; z-index: 50;">
+                            <select id="select-aula-gerenciar" class="choices-custom">
+                                <option value="">Selecione a turma...</option>
+                            </select>
+                        </div>
+
+                        <div id="area-alocacao"
+                            style="display: none; padding-top: 10px; border-top: 1px solid var(--border);">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h4 id="alocacao-titulo-aula" style="color: var(--primary-dark);">Turma</h4>
+                                <span class="vagas-badge">Vagas Fixas Ocupadas: <span
+                                        id="aula-ocupacao">0/0</span></span>
+                            </div>
+                            <div id="lista-alunos-checkbox" class="student-check-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="modal-reposicao" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Agendar Reposição</h3><button class="close-modal" data-target="modal-reposicao">&times;</button>
+            </div>
+            <p id="txt-info-falta" class="mb-1 text-light" style="font-size: 0.9rem;"></p>
+            <form id="form-reposicao">
+                <input type="hidden" id="reposicao-falta-id">
+                <div class="form-group">
+                    <label>Escolha o dia da reposição:</label>
+                    <input type="text" id="reposicao-data" class="input-field" placeholder="Selecione a data..."
+                        required>
+                </div>
+                <div class="form-group">
+                    <label>Turmas no dia selecionado:</label>
+                    <select id="reposicao-aula" class="input-field" required>
+                        <option value="" disabled selected>Selecione a data primeiro...</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Confirmar Reposição</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-pdf-periodo" class="modal-overlay">
+        <div class="modal-content" style="width: 350px;">
+            <div class="modal-header">
+                <h3>Gerar PDF</h3><button class="close-modal" data-target="modal-pdf-periodo">&times;</button>
+            </div>
+            <p class="text-hint mb-1">Selecione o mês para o relatório:</p>
+            <input type="text" id="pdf-mes-escolha" class="input-field mb-1" placeholder="Ex: Abril 2026">
+            <button id="btn-confirm-pdf-prontuario" class="btn btn-primary btn-full">Gerar Relatório</button>
+        </div>
+    </div>
+
+    <div id="modal-confirm" class="modal-overlay">
+        <div class="modal-content" style="width: 320px; text-align: center;">
+            <div id="confirm-icon" style="font-size: 3rem; margin-bottom: 15px;"></div>
+            <h3 id="confirm-title" style="margin-bottom: 10px;">Aviso</h3>
+            <p id="confirm-text" style="margin-bottom: 20px; color: var(--text-light);"></p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-outline btn-full close-modal" data-target="modal-confirm">Cancelar</button>
+                <button id="btn-confirm-yes" class="btn btn-primary btn-full">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-aluno" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Dados do Aluno</h3><button class="close-modal" data-target="modal-aluno">&times;</button>
+            </div>
+            <form id="form-aluno"><input type="hidden" id="aluno-id">
+                <div class="form-group"><label>Nome Completo</label><input type="text" id="aluno-nome"
+                        class="input-field" required></div>
+                <div class="form-group"><label>Frequência Semanal</label><select id="aluno-frequencia"
+                        class="choices-custom">
+                        <option value="1">1x na semana</option>
+                        <option value="2">2x na semana</option>
+                        <option value="3">3x na semana</option>
+                    </select></div><button type="submit" class="btn btn-primary btn-full">Salvar Aluno</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-precos" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tabela de Preços</h3><button class="close-modal" data-target="modal-precos">&times;</button>
+            </div>
+            <form id="form-precos">
+                <div class="form-group"><label>1x na semana (R$)</label><input type="number" id="price-1"
+                        class="input-field" required></div>
+                <div class="form-group"><label>2x na semana (R$)</label><input type="number" id="price-2"
+                        class="input-field" required></div>
+                <div class="form-group"><label>3x na semana (R$)</label><input type="number" id="price-3"
+                        class="input-field" required></div>
+                <button type="submit" class="btn btn-primary btn-full">Atualizar Valores</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-backup" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Backup</h3><button class="close-modal" data-target="modal-backup">&times;</button>
+            </div>
+            <div class="flex-column"><button id="btn-export-json" class="btn btn-primary"><i
+                        class="fa-solid fa-download"></i> Exportar .json</button><button id="btn-import-trigger"
+                    class="btn btn-outline"><i class="fa-solid fa-upload"></i> Importar .json</button></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
