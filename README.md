@@ -2,7 +2,7 @@
   <img src="favicon.png" alt="Pilates Manager Logo" width="120"/>
 </p>
 
-<h1 align="center">Sistema de Gestão - Pilates Manager - Dr. Giovana</h1>
+<h1 align="center">Sistema de Gestão - Pilates Manager - Dra. Giovana</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Concluído-success?style=for-the-badge&logo=check" alt="Status">
@@ -52,18 +52,20 @@
 
 ## 📱 Destaque Técnico: Relatórios Nativos e Arquitetura
 
-O sistema resolve um problema clássico da geração de relatórios clínicos no navegador utilizando <b>CSS Print Media Queries</b> (`@media print`). A interface da aplicação é totalmente reestruturada na hora da impressão, ocultando menus e botões. Além disso, a regra `@page { margin: 0; }` foi aplicada para forçar a remoção de metadados indesejados gerados pelo navegador (como link da página, data e número de folhas), entregando um PDF extremamente limpo e profissional gerado 100% no *client-side*. 
+O sistema resolve um problema clássico da geração de relatórios clínicos no navegador utilizando <b>CSS Print Media Queries</b> (`@media print`). A interface da aplicação é totalmente reestruturada na hora da impressão, ocultando menus e botões. Além disso, a regra `@page { margin: 0; }` foi aplicada para forçar a remoção de metadados indesejados gerados pelo navegador (como link da página, data e número de folhas), entregando um PDF extremamente limpo e profissional gerado 100% no _client-side_.
 
 A arquitetura <b>Offline-First</b> baseada em banco de dados NoSQL (IndexedDB) elimina a latência de requisições web, tornando o sistema ultrarrápido.
 
 ## 🚀 Como Executar o Projeto
 
-Por ser um sistema *Single Page Application* (SPA) estático, você não precisa de um servidor complexo ou banco de dados rodando por trás.
+Por ser um sistema _Single Page Application_ (SPA) estático, você não precisa de um servidor complexo ou banco de dados rodando por trás.
 
 ### 🌐 Demo Online
+
 O sistema está disponível para uso imediato em: [https://rvitorfb.github.io/sistema-pilates-maneger/](https://rvitorfb.github.io/sistema-pilates-maneger/)
 
 ### 💻 Execução Local
+
 1. Faça o clone deste repositório:
    ```bash
    git clone [https://github.com/RVitorFb/pilates-manager.git](https://github.com/RVitorFb/pilates-manager.git)
@@ -72,4 +74,5 @@ O sistema está disponível para uso imediato em: [https://rvitorfb.github.io/si
 3. Abra o arquivo `index.html` diretamente em qualquer navegador moderno (Chrome, Edge, Firefox).
 
 ---
+
 **Desenvolvido por [Raul Vitor](https://github.com/RVitorFb)**
