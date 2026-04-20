@@ -656,203 +656,6 @@ h3 {
     color: var(--text-light);
 }
 
-/* =======================================================
-   PRINT (PDF PROFISSIONAL E ALINHADO)
-======================================================= */
-.only-print {
-    display: none;
-}
-
-@media print {
-
-    @page {
-        size: A4;
-        margin: 0;
-        /* Remove cabeçalho e rodapé do navegador */
-    }
-
-    body {
-        background: #fff !important;
-        color: #000 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        padding: 1.5cm !important;
-        /* Compensa a margem zero da página */
-    }
-
-    /* REMOVE LAYOUT FLEX QUE QUEBRA NO PDF */
-    .app-container {
-        display: block !important;
-    }
-
-    .main-content {
-        display: block !important;
-        width: 100% !important;
-        height: auto !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: visible !important;
-    }
-
-    /* ESCONDE ELEMENTOS DESNECESSÁRIOS */
-    .no-print,
-    .sidebar,
-    .btn,
-    .header-actions,
-    .sub-tabs-container,
-    .modal-overlay {
-        display: none !important;
-    }
-
-    /* CARD LIMPO */
-    .card {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-    }
-
-    /* HEADER DO PDF */
-    .only-print {
-        display: block !important;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #20B2AA;
-    }
-
-    .only-print h1 {
-        font-size: 18pt !important;
-        color: #20B2AA !important;
-        margin-bottom: 5px;
-    }
-
-    .only-print p {
-        font-size: 12pt !important;
-        color: #333 !important;
-    }
-
-    /* ==============================
-       TABELA FINANCEIRO
-    ============================== */
-
-    #tab-financeiro table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        table-layout: fixed !important;
-    }
-
-    #tab-financeiro th,
-    #tab-financeiro td {
-        padding: 10px 5px !important;
-        font-size: 12pt !important;
-        border-bottom: 1px solid #ddd !important;
-        white-space: normal !important;
-    }
-
-    /* COLUNAS */
-    #tab-financeiro th:nth-child(1),
-    #tab-financeiro td:nth-child(1) {
-        width: 50%;
-        text-align: left;
-        padding-left: 2px !important;
-    }
-
-    #tab-financeiro th:nth-child(2),
-    #tab-financeiro td:nth-child(2) {
-        width: 10%;
-        text-align: center;
-    }
-
-    #tab-financeiro th:nth-child(3),
-    #tab-financeiro td:nth-child(3) {
-        width: 22%;
-        text-align: center;
-    }
-
-    /* STATUS - ALINHAMENTO CORRETO FINAL */
-    #tab-financeiro th:nth-child(4),
-    #tab-financeiro td:nth-child(4) {
-        width: 18%;
-        text-align: right !important;
-        padding-right: 4px !important;
-    }
-
-    /* GARANTE QUE O STATUS VÁ ATÉ O FINAL */
-    #tab-financeiro td:nth-child(4)>* {
-        display: block;
-        width: fit-content;
-        margin-left: auto;
-        text-align: center;
-    }
-
-    /* REMOVE ESTILO DE BOTÃO NO PRINT */
-    .status-select-native {
-        border: none !important;
-        background: transparent !important;
-        padding: 0 !important;
-        min-width: unset !important;
-        font-size: 12pt !important;
-        font-weight: bold;
-    }
-
-    /* CORES DO STATUS (TEXTO APENAS) */
-    .st-pago {
-        color: #10b981 !important;
-        background: transparent !important;
-    }
-
-    .st-pendente {
-        color: #f59e0b !important;
-        background: transparent !important;
-    }
-
-    .st-atrasado {
-        color: #ef4444 !important;
-        background: transparent !important;
-    }
-
-    /* REMOVE ELEMENTOS VISUAIS EXTRAS */
-    hr {
-        display: none !important;
-    }
-
-    /* TIMELINE LIMPA */
-    .timeline {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .timeline::before {
-        display: none !important;
-    }
-
-    .tl-item {
-        border: none !important;
-        border-bottom: 1px solid #ddd !important;
-        background: transparent !important;
-        margin: 0 !important;
-        padding: 12px 0 !important;
-        page-break-inside: avoid;
-        font-size: 12pt !important;
-    }
-
-    .tl-item::before {
-        display: none !important;
-    }
-
-    .tl-date {
-        font-size: 12pt !important;
-        font-weight: bold;
-        color: #000 !important;
-    }
-
-    .no-border-print {
-        border: none !important;
-    }
-}
-
-
 /* MOBILE */
 @media (max-width: 768px) {
     .app-container {
@@ -871,8 +674,25 @@ h3 {
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
     }
 
+    /* MODIFICADO: Exibe a logo fixada no topo da tela no mobile */
     .brand {
-        display: none;
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background-color: var(--surface);
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+        border-bottom: 1px solid var(--border);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        padding: 0;
+    }
+
+    .brand h2 {
+        font-size: 1.1rem;
     }
 
     .menu {
@@ -905,6 +725,7 @@ h3 {
 
     .main-content {
         padding: 15px;
+        padding-top: 75px; /* MODIFICADO: Espaço no topo para não esconder o conteúdo atrás da logo */
         padding-bottom: 95px;
     }
 
@@ -1067,6 +888,185 @@ h3 {
         flex: 1;
         min-width: 0;
         word-wrap: break-word;
-        padding-
+        padding-right: 5px;
+    }
+}
 
+/* =======================================================
+   PRINT (PDF PROFISSIONAL E ALINHADO)
+======================================================= */
+.only-print {
+    display: none;
+}
 
+@media print {
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        padding: 1.5cm !important;
+    }
+
+    .app-container {
+        display: block !important;
+    }
+
+    .main-content {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .no-print,
+    .sidebar,
+    .btn,
+    .header-actions,
+    .sub-tabs-container,
+    .modal-overlay {
+        display: none !important;
+    }
+
+    .card {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .only-print {
+        display: block !important;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #20B2AA;
+    }
+
+    .only-print h1 {
+        font-size: 18pt !important;
+        color: #20B2AA !important;
+        margin-bottom: 5px;
+    }
+
+    .only-print p {
+        font-size: 12pt !important;
+        color: #333 !important;
+    }
+
+    #tab-financeiro table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+    }
+
+    #tab-financeiro th,
+    #tab-financeiro td {
+        padding: 10px 5px !important;
+        font-size: 12pt !important;
+        border-bottom: 1px solid #ddd !important;
+        white-space: normal !important;
+    }
+
+    #tab-financeiro th:nth-child(1),
+    #tab-financeiro td:nth-child(1) {
+        width: 50%;
+        text-align: left;
+        padding-left: 2px !important;
+    }
+
+    #tab-financeiro th:nth-child(2),
+    #tab-financeiro td:nth-child(2) {
+        width: 10%;
+        text-align: center;
+    }
+
+    #tab-financeiro th:nth-child(3),
+    #tab-financeiro td:nth-child(3) {
+        width: 22%;
+        text-align: center;
+    }
+
+    #tab-financeiro th:nth-child(4),
+    #tab-financeiro td:nth-child(4) {
+        width: 18%;
+        text-align: right !important;
+        padding-right: 4px !important;
+    }
+
+    #tab-financeiro td:nth-child(4)>* {
+        display: block;
+        width: fit-content;
+        margin-left: auto;
+        text-align: center;
+    }
+
+    .status-select-native {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        min-width: unset !important;
+        font-size: 12pt !important;
+        font-weight: bold;
+    }
+
+    .st-pago {
+        color: #10b981 !important;
+        background: transparent !important;
+    }
+
+    .st-pendente {
+        color: #f59e0b !important;
+        background: transparent !important;
+    }
+
+    .st-atrasado {
+        color: #ef4444 !important;
+        background: transparent !important;
+    }
+
+    hr {
+        display: none !important;
+    }
+
+    .timeline {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .timeline::before {
+        display: none !important;
+    }
+
+    .tl-item {
+        border: none !important;
+        border-bottom: 1px solid #ddd !important;
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 12px 0 !important;
+        page-break-inside: avoid;
+        font-size: 12pt !important;
+    }
+
+    .tl-item::before {
+        display: none !important;
+    }
+
+    .tl-date {
+        font-size: 12pt !important;
+        font-weight: bold;
+        color: #000 !important;
+    }
+
+    .no-border-print {
+        border: none !important;
+    }
+}
