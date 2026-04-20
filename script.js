@@ -2,7 +2,7 @@
 // 1. BANCO DE DADOS 
 // ==========================================
 const DB_NAME = 'PilatesSPA_DB';
-const DB_VERSION = 13;
+const DB_VERSION = 13; 
 let dbInstance = null;
 
 const DB = {
@@ -13,7 +13,6 @@ const DB = {
                 const db = e.target.result;
                 const tx = e.target.transaction;
 
-                // Recriando as tabelas e garantindo os índices essenciais
                 if (!db.objectStoreNames.contains('alunos')) db.createObjectStore('alunos', { keyPath: 'id', autoIncrement: true });
 
                 let storeEvo;
@@ -103,7 +102,9 @@ const getDatesOfCurrentWeek = () => {
 };
 
 let fpDataEvo, fpAulaInicio, fpAulaFim, fpMesFin, fpMesPdf, fpDataReposicao;
+let fpEditAulaInicio, fpEditAulaFim;
 let choicesProntuario, choicesAgenda, choicesFreqAluno, choicesFiltroDia;
+let choicesAgendaRep, choicesFiltroDiaRep;
 let confirmCallback = null;
 
 const setupNavigation = () => {
@@ -126,6 +127,9 @@ const initPlugins = () => {
         fpDataEvo = flatpickr("#evo-data", { locale: "pt", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", disableMobile: true });
         fpAulaInicio = flatpickr("#aula-inicio", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, disableMobile: true });
         fpAulaFim = flatpickr("#aula-fim", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, disableMobile: true });
+        
+        fpEditAulaInicio = flatpickr("#edit-aula-inicio", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, disableMobile: true });
+        fpEditAulaFim = flatpickr("#edit-aula-fim", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, disableMobile: true });
 
         const monthConfig = { locale: "pt", disableMobile: true, plugins: [new monthSelectPlugin({ shorthand: false, dateFormat: "Y-m", altFormat: "F Y" })] };
 
@@ -136,6 +140,9 @@ const initPlugins = () => {
         choicesAgenda = new Choices('#select-aula-gerenciar', { searchEnabled: false, itemSelectText: "", placeholderValue: "Selecione a turma...", shouldSort: false });
         choicesFreqAluno = new Choices('#aluno-frequencia', { searchEnabled: false, itemSelectText: "", shouldSort: false });
         choicesFiltroDia = new Choices('#filtro-dia-agenda', { searchEnabled: false, itemSelectText: "", shouldSort: false });
+
+        choicesAgendaRep = new Choices('#select-aula-reposicao', { searchEnabled: false, itemSelectText: "", placeholderValue: "Selecione a turma...", shouldSort: false });
+        choicesFiltroDiaRep = new Choices('#filtro-dia-reposicao', { searchEnabled: false, itemSelectText: "", shouldSort: false });
 
         fpDataReposicao = flatpickr("#reposicao-data", { locale: "pt", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", disableMobile: true, minDate: "today" });
     } catch (e) { console.error("Erro nos plugins visuais", e); }
@@ -237,7 +244,10 @@ const UI = {
                 html += aulasDoDia.map(aula => `
                     <div class="bloco-agenda">
                         <div style="flex: 1;"><strong>${aula.nome}</strong><br><span style="font-size:0.9rem; color:var(--text-light);"><i class="fa-regular fa-clock"></i> ${aula.inicio} - ${aula.fim} | <i class="fa-solid fa-user-group"></i> ${aula.limite} máx.</span></div>
-                        <button class="btn btn-danger" data-action="del-aula" data-id="${aula.id}"><i class="fa-solid fa-trash"></i></button>
+                        <div class="btn-group" style="gap: 5px;">
+                            <button class="btn btn-outline" style="padding:6px 10px; font-size:13px;" data-action="edit-aula" data-id="${aula.id}"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-danger" style="padding:6px 10px; font-size:13px;" data-action="del-aula" data-id="${aula.id}"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </div>
                 `).join('');
             }
@@ -249,7 +259,10 @@ const UI = {
             html += aulasSemDia.map(aula => `
                 <div class="bloco-agenda">
                     <div style="flex: 1;"><strong>${aula.nome}</strong><br><span style="font-size:0.9rem; color:var(--text-light);"><i class="fa-regular fa-clock"></i> ${aula.inicio} - ${aula.fim} | <i class="fa-solid fa-user-group"></i> ${aula.limite} máx.</span></div>
-                    <button class="btn btn-danger" data-action="del-aula" data-id="${aula.id}"><i class="fa-solid fa-trash"></i></button>
+                    <div class="btn-group" style="gap: 5px;">
+                        <button class="btn btn-outline" style="padding:6px 10px; font-size:13px;" data-action="edit-aula" data-id="${aula.id}"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-danger" style="padding:6px 10px; font-size:13px;" data-action="del-aula" data-id="${aula.id}"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -334,14 +347,11 @@ const UI = {
         const arrAlunos = alunos.map(a => ({ value: String(a.id), label: a.nome }));
         choicesProntuario.setChoices([{ value: '', label: 'Selecione o aluno...', placeholder: true, selected: true }, ...arrAlunos], 'value', 'label', true);
 
+        // Update dropdown Fixo
         const valAtualAula = document.getElementById('select-aula-gerenciar').value;
         const diaSelecionado = document.getElementById('filtro-dia-agenda').value;
 
-        let aulasFiltradas = aulas;
-        if (diaSelecionado) {
-            aulasFiltradas = aulas.filter(a => a.diaSemana === diaSelecionado);
-        }
-
+        let aulasFiltradas = diaSelecionado ? aulas.filter(a => a.diaSemana === diaSelecionado) : aulas;
         choicesAgenda.clearStore();
         const arrAulas = aulasFiltradas.sort((a, b) => a.inicio.localeCompare(b.inicio)).map(a => ({ value: String(a.id), label: `${a.diaSemana ? a.diaSemana.substring(0, 3) + ' - ' : ''}${a.nome} (${a.inicio} - ${a.fim})` }));
         choicesAgenda.setChoices([{ value: '', label: 'Selecione a turma...', placeholder: true, selected: true }, ...arrAulas], 'value', 'label', true);
@@ -350,6 +360,21 @@ const UI = {
             choicesAgenda.setChoiceByValue(String(valAtualAula));
         } else {
             document.getElementById('area-alocacao').style.display = 'none';
+        }
+
+        // Update dropdown Reposicao
+        if (choicesAgendaRep) {
+            const valAtualRep = document.getElementById('select-aula-reposicao').value;
+            const diaSelRep = document.getElementById('filtro-dia-reposicao').value;
+            let aulasFiltRep = diaSelRep ? aulas.filter(a => a.diaSemana === diaSelRep) : aulas;
+            choicesAgendaRep.clearStore();
+            const arrAulasRep = aulasFiltRep.sort((a, b) => a.inicio.localeCompare(b.inicio)).map(a => ({ value: String(a.id), label: `${a.diaSemana ? a.diaSemana.substring(0, 3) + ' - ' : ''}${a.nome} (${a.inicio} - ${a.fim})` }));
+            choicesAgendaRep.setChoices([{ value: '', label: 'Selecione a turma...', placeholder: true, selected: true }, ...arrAulasRep], 'value', 'label', true);
+            if (valAtualRep && arrAulasRep.some(a => a.value === valAtualRep)) {
+                choicesAgendaRep.setChoiceByValue(String(valAtualRep));
+            } else {
+                document.getElementById('area-reposicao-alocacao').style.display = 'none';
+            }
         }
     },
 
@@ -616,7 +641,12 @@ const loadData = async () => {
     UI.renderFinanceiro(state.alunos, state.precos, mesFinValor);
     UI.updateChoicesSafe(state.alunos, state.aulas);
 
-    if (document.getElementById('select-aula-gerenciar').value) await handleAlocacaoChange();
+    if (document.getElementById('select-aula-gerenciar') && document.getElementById('select-aula-gerenciar').value) {
+        await handleAlocacaoChange();
+    }
+    if (document.getElementById('select-aula-reposicao') && document.getElementById('select-aula-reposicao').value) {
+        await handleReposicaoAbaChange();
+    }
 };
 
 const handleAlocacaoChange = async () => {
@@ -668,28 +698,17 @@ const handleAlocacaoChange = async () => {
     }).join('');
 
     const container = document.getElementById('lista-alunos-checkbox');
-    container.className = '';
+    container.className = 'student-check-list';
+    container.innerHTML = htmlCheckboxes;
+};
 
-    let htmlRep = `
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed var(--border);">
-            <style>.check-reposicao-dinamica:checked + .custom-checkbox { background: var(--warning) !important; border-color: var(--warning) !important; }</style>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                <h4 style="color: var(--warning); margin: 0;"><i class="fa-solid fa-calendar-plus"></i> Gerenciar Reposições e Extras</h4>
-                <div style="display:flex; align-items:center; gap: 10px;">
-                    <label style="font-size: 0.85rem; color: var(--text-light); font-weight: bold;">Escolha a Data:</label>
-                    <input type="text" id="data-reposicao-gerenciar" class="input-field" style="width: 160px; padding: 8px 12px; border-color: var(--warning);" placeholder="Selecionar...">
-                </div>
-            </div>
-            <div id="grid-reposicoes-gerenciar" class="student-check-list">
-                <p style="grid-column: 1 / -1; color: var(--text-light); font-size: 0.9rem;">Selecione a data acima para visualizar e gerenciar alunos extras para esta turma.</p>
-            </div>
-        </div>
-    `;
+const handleReposicaoAbaChange = async () => {
+    const aulaId = Number(document.getElementById('select-aula-reposicao').value);
+    const area = document.getElementById('area-reposicao-alocacao');
+    if (!aulaId) return area.style.display = 'none';
 
-    container.innerHTML = `
-        <div class="student-check-list">${htmlCheckboxes}</div>
-        ${htmlRep}
-    `;
+    area.style.display = 'block';
+    const aula = state.aulas.find(a => a.id === aulaId);
 
     const mapDias = { 'Domingo': 0, 'Segunda-feira': 1, 'Terça-feira': 2, 'Quarta-feira': 3, 'Quinta-feira': 4, 'Sexta-feira': 5, 'Sábado': 6 };
     const diaNum = mapDias[aula.diaSemana];
@@ -720,6 +739,7 @@ const handleAlocacaoChange = async () => {
         window.renderReposicoesGrid(aula.id, window.lastRepData);
     } else {
         window.lastRepData = null;
+        document.getElementById('grid-reposicoes-gerenciar').innerHTML = '<p style="grid-column: 1 / -1; color: var(--text-light); font-size: 0.9rem;">Selecione a data acima para visualizar e gerenciar alunos extras para esta turma.</p>';
     }
 };
 
@@ -730,14 +750,26 @@ const setup = () => {
     document.getElementById('btn-view-criar').onclick = () => {
         document.getElementById('view-criar-aula').style.display = 'block';
         document.getElementById('view-gerenciar-agenda').style.display = 'none';
+        document.getElementById('view-gerenciar-reposicao').style.display = 'none';
         document.getElementById('btn-view-criar').classList.add('active-subtab');
         document.getElementById('btn-view-gerenciar').classList.remove('active-subtab');
+        document.getElementById('btn-view-reposicao').classList.remove('active-subtab');
     };
     document.getElementById('btn-view-gerenciar').onclick = () => {
         document.getElementById('view-criar-aula').style.display = 'none';
         document.getElementById('view-gerenciar-agenda').style.display = 'block';
+        document.getElementById('view-gerenciar-reposicao').style.display = 'none';
         document.getElementById('btn-view-criar').classList.remove('active-subtab');
         document.getElementById('btn-view-gerenciar').classList.add('active-subtab');
+        document.getElementById('btn-view-reposicao').classList.remove('active-subtab');
+    };
+    document.getElementById('btn-view-reposicao').onclick = () => {
+        document.getElementById('view-criar-aula').style.display = 'none';
+        document.getElementById('view-gerenciar-agenda').style.display = 'none';
+        document.getElementById('view-gerenciar-reposicao').style.display = 'block';
+        document.getElementById('btn-view-criar').classList.remove('active-subtab');
+        document.getElementById('btn-view-gerenciar').classList.remove('active-subtab');
+        document.getElementById('btn-view-reposicao').classList.add('active-subtab');
     };
 
     document.getElementById('btn-novo-aluno').onclick = () => UI.toggleModal('modal-aluno', true);
@@ -800,12 +832,47 @@ const setup = () => {
         if (fpAulaFim) fpAulaFim.clear();
         loadData();
     };
+    
+    document.getElementById('form-edit-aula').onsubmit = async (e) => {
+        e.preventDefault();
+        const id = Number(document.getElementById('edit-aula-id').value);
+        const diaSemana = document.getElementById('edit-aula-dia').value;
+        const inicio = document.getElementById('edit-aula-inicio').value;
+        const fim = document.getElementById('edit-aula-fim').value;
+        const nome = document.getElementById('edit-aula-nome').value;
+        const limite = Number(document.getElementById('edit-aula-limite').value);
+
+        if (!inicio || !fim) return UI.customConfirm('Atenção', 'Preencha os horários corretamente.', 'info', () => { });
+        if (inicio >= fim) return UI.customConfirm('Aviso', 'O horário de término deve ser maior que o início.', 'info', () => { });
+
+        const choque = state.aulas.some(a => a.id !== id && a.diaSemana === diaSemana && (inicio < a.fim) && (fim > a.inicio));
+        if (choque) return UI.customConfirm('Conflito', 'Já existe uma turma cadastrada nesse período no mesmo dia.', 'info', () => { });
+
+        const aulaAtual = state.aulas.find(a => a.id === id);
+        if (aulaAtual) {
+            aulaAtual.nome = nome;
+            aulaAtual.diaSemana = diaSemana;
+            aulaAtual.inicio = inicio;
+            aulaAtual.fim = fim;
+            aulaAtual.limite = limite;
+            await DB.save('aulas', aulaAtual);
+            UI.toggleModal('modal-edit-aula', false);
+            loadData();
+        }
+    };
 
     document.getElementById('filtro-dia-agenda').addEventListener('change', () => {
         UI.updateChoicesSafe(state.alunos, state.aulas);
     });
 
     document.getElementById('select-aula-gerenciar').addEventListener('change', handleAlocacaoChange);
+
+    document.getElementById('filtro-dia-reposicao').addEventListener('change', () => {
+        UI.updateChoicesSafe(state.alunos, state.aulas);
+    });
+    
+    document.getElementById('select-aula-reposicao').addEventListener('change', handleReposicaoAbaChange);
+
 
     document.getElementById('select-aluno-prontuario').addEventListener('change', async (e) => {
         const id = Number(e.target.value);
@@ -829,34 +896,6 @@ const setup = () => {
 
     document.getElementById('lista-alunos-checkbox').addEventListener('change', async (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
-
-            if (e.target.classList.contains('check-reposicao-dinamica')) {
-                const alunoId = Number(e.target.value);
-                const aulaId = Number(e.target.dataset.aula);
-                const dataRep = e.target.dataset.data;
-
-                if (e.target.checked) {
-                    await DB.save('reposicoes', { alunoId, faltaId: 0, dataReposicao: dataRep, aulaIdReposicao: aulaId });
-                } else {
-                    const repos = await DB.getAll('reposicoes');
-                    const repsToRemove = repos.filter(r => r.alunoId === alunoId && r.dataReposicao === dataRep && r.aulaIdReposicao === aulaId);
-                    for (let r of repsToRemove) {
-                        await DB.remove('reposicoes', r.id);
-                        if (r.faltaId && r.faltaId > 0) {
-                            const faltas = await DB.getAll('faltas');
-                            const falta = faltas.find(f => f.id === r.faltaId);
-                            if (falta) {
-                                falta.status = 'pendente';
-                                await DB.save('faltas', falta);
-                            }
-                        }
-                    }
-                }
-
-                await loadData();
-                return;
-            }
-
             const alunoId = Number(e.target.value);
             const aulaId = Number(document.getElementById('select-aula-gerenciar').value);
             if (e.target.checked) {
@@ -866,10 +905,38 @@ const setup = () => {
                 const mat = matriculas.find(m => m.alunoId === alunoId);
                 if (mat) await DB.remove('aula_alunos', mat.id);
             }
-
             await loadData();
         }
     });
+
+    // Event listener separado para a grid dinâmica na nova aba
+    document.addEventListener('change', async (e) => {
+        if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox' && e.target.classList.contains('check-reposicao-dinamica')) {
+            const alunoId = Number(e.target.value);
+            const aulaId = Number(e.target.dataset.aula);
+            const dataRep = e.target.dataset.data;
+
+            if (e.target.checked) {
+                await DB.save('reposicoes', { alunoId, faltaId: 0, dataReposicao: dataRep, aulaIdReposicao: aulaId });
+            } else {
+                const repos = await DB.getAll('reposicoes');
+                const repsToRemove = repos.filter(r => r.alunoId === alunoId && r.dataReposicao === dataRep && r.aulaIdReposicao === aulaId);
+                for (let r of repsToRemove) {
+                    await DB.remove('reposicoes', r.id);
+                    if (r.faltaId && r.faltaId > 0) {
+                        const faltas = await DB.getAll('faltas');
+                        const falta = faltas.find(f => f.id === r.faltaId);
+                        if (falta) {
+                            falta.status = 'pendente';
+                            await DB.save('faltas', falta);
+                        }
+                    }
+                }
+            }
+            await loadData();
+        }
+    });
+
 
     document.getElementById('reposicao-data').addEventListener('change', (e) => {
         const dateStr = e.target.value;
@@ -998,9 +1065,41 @@ const setup = () => {
         }
         if (act === 'del-aula') {
             UI.customConfirm('Excluir Turma', 'Os alunos ficarão livres desse horário.', 'del', async () => {
+                
+                const mats = await DB.getByIndex('aula_alunos', 'aulaId', id);
+                for (let m of mats) await DB.remove('aula_alunos', m.id);
+
+                const repos = await DB.getAll('reposicoes');
+                const repsToRemove = repos.filter(r => r.aulaIdReposicao === id);
+                for (let r of repsToRemove) {
+                    await DB.remove('reposicoes', r.id);
+                    if (r.faltaId && r.faltaId > 0) {
+                        const faltas = await DB.getAll('faltas');
+                        const falta = faltas.find(f => f.id === r.faltaId);
+                        if (falta) {
+                            falta.status = 'pendente';
+                            await DB.save('faltas', falta);
+                        }
+                    }
+                }
+
                 await DB.remove('aulas', id);
-                loadData();
+                await loadData();
             });
+        }
+        if (act === 'edit-aula') {
+            const aula = state.aulas.find(a => a.id === id);
+            if (aula) {
+                document.getElementById('edit-aula-id').value = aula.id;
+                document.getElementById('edit-aula-dia').value = aula.diaSemana;
+                document.getElementById('edit-aula-nome').value = aula.nome;
+                document.getElementById('edit-aula-limite').value = aula.limite;
+                
+                if (fpEditAulaInicio) fpEditAulaInicio.setDate(aula.inicio);
+                if (fpEditAulaFim) fpEditAulaFim.setDate(aula.fim);
+                
+                UI.toggleModal('modal-edit-aula', true);
+            }
         }
         if (act === 'edit-evo') {
             const evo = (await DB.getAll('evolucoes')).find(e => e.id === id);
