@@ -195,6 +195,7 @@
                         Turmas</button>
                     <button class="sub-tab-btn" id="btn-view-gerenciar"><i class="fa-solid fa-user-plus"></i> Matricular
                         (Fixo)</button>
+                    <button class="sub-tab-btn" id="btn-view-reposicao"><i class="fa-solid fa-calendar-plus"></i> Reposições (Extras)</button>
                 </div>
 
                 <div id="view-criar-aula">
@@ -258,8 +259,83 @@
                         </div>
                     </div>
                 </div>
+
+                <div id="view-gerenciar-reposicao" style="display: none;">
+                    <div class="card mt-2">
+                        <h3>Gerenciar Reposições e Extras</h3>
+                        <div style="margin-top: 15px; margin-bottom: 10px; position: relative; z-index: 51;">
+                            <select id="filtro-dia-reposicao" class="choices-custom">
+                                <option value="">Filtrar turmas por dia...</option>
+                                <option value="Segunda-feira">Segunda-feira</option>
+                                <option value="Terça-feira">Terça-feira</option>
+                                <option value="Quarta-feira">Quarta-feira</option>
+                                <option value="Quinta-feira">Quinta-feira</option>
+                                <option value="Sexta-feira">Sexta-feira</option>
+                                <option value="Sábado">Sábado</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom: 10px; position: relative; z-index: 50;">
+                            <select id="select-aula-reposicao" class="choices-custom">
+                                <option value="">Selecione a turma...</option>
+                            </select>
+                        </div>
+
+                        <div id="area-reposicao-alocacao" style="display: none; padding-top: 10px; border-top: 1px solid var(--border);">
+                            <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 15px;">
+                                <label style="font-size: 0.85rem; color: var(--text-light); font-weight: bold;">Escolha a Data da Reposição:</label>
+                                <input type="text" id="data-reposicao-gerenciar" class="input-field" style="width: 160px; padding: 8px 12px; border-color: var(--warning);" placeholder="Selecionar...">
+                            </div>
+                            <div id="grid-reposicoes-gerenciar" class="student-check-list">
+                                <p style="grid-column: 1 / -1; color: var(--text-light); font-size: 0.9rem;">Selecione a data acima para visualizar e gerenciar alunos extras para esta turma.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </section>
         </main>
+    </div>
+
+    <div id="modal-edit-aula" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Turma</h3><button class="close-modal" data-target="modal-edit-aula">&times;</button>
+            </div>
+            <form id="form-edit-aula">
+                <input type="hidden" id="edit-aula-id">
+                <div class="form-group">
+                    <label>Dia da Semana</label>
+                    <select id="edit-aula-dia" class="input-field mb-1" required>
+                        <option value="Segunda-feira">Segunda-feira</option>
+                        <option value="Terça-feira">Terça-feira</option>
+                        <option value="Quarta-feira">Quarta-feira</option>
+                        <option value="Quinta-feira">Quinta-feira</option>
+                        <option value="Sexta-feira">Sexta-feira</option>
+                        <option value="Sábado">Sábado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nome da Turma</label>
+                    <input type="text" id="edit-aula-nome" class="input-field mb-1" required>
+                </div>
+                <div class="form-row mb-1">
+                    <div>
+                        <label>Início</label>
+                        <input type="text" id="edit-aula-inicio" class="input-field" required>
+                    </div>
+                    <div>
+                        <label>Fim</label>
+                        <input type="text" id="edit-aula-fim" class="input-field" required>
+                    </div>
+                </div>
+                <div class="form-group mt-1">
+                    <label>Máx. Alunos</label>
+                    <input type="number" id="edit-aula-limite" class="input-field" min="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full mt-2">Salvar Alterações</button>
+            </form>
+        </div>
     </div>
 
     <div id="modal-reposicao" class="modal-overlay">
